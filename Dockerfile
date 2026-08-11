@@ -1,19 +1,32 @@
-FROM python:3.12-slim
+FROM python:3.12-slim AS builder
+
+WORKDIR /app
+
+ENV POETRY_VIRTUALENVS_IN_PROJECT=true
+
+RUN pip install --no-cache-dir poetry==2.4.1
+
+COPY pyproject.toml poetry.lock ./
+
+RUN poetry install --only main --no-root --no-interaction --no-ansi
+
+
+FROM python:3.12-slim AS runtime
 
 WORKDIR /app
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
-ENV POETRY_VIRTUALENVS_CREATE=false
+ENV PATH="/app/.venv/bin:$PATH"
 
-RUN pip install --no-cache-dir poetry
+RUN useradd --create-home appuser
 
-COPY pyproject.toml poetry.lock README.md ./
+COPY --from=builder /app/.venv /app/.venv
 
-RUN poetry install --no-root --no-interaction --no-ansi
+COPY --chown=appuser:appuser alembic ./alembic
+COPY --chown=appuser:appuser alembic.ini .
+COPY --chown=appuser:appuser src ./src
 
-COPY alembic ./alembic
-COPY alembic.ini .
-COPY src ./src
+USER appuser
 
 CMD ["uvicorn", "src.application:get_app", "--factory", "--host", "0.0.0.0", "--port", "8000"]

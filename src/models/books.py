@@ -4,7 +4,7 @@ from uuid import UUID, uuid4
 import sqlalchemy as sa
 from sqlalchemy.orm import Mapped, mapped_column
 
-from src.models.users import Base
+from src.models.base import Base
 
 
 class BookModelOrm(Base):
@@ -43,9 +43,8 @@ class BookModelOrm(Base):
 
     updated_at: Mapped[datetime] = mapped_column(
         sa.DateTime(timezone=True),
-        server_default=sa.func.now(),
         onupdate=sa.func.now(),
-        nullable=False,
+        nullable=True,
     )
 
     is_deleted: Mapped[bool] = mapped_column(

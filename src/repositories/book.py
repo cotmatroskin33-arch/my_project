@@ -1,6 +1,6 @@
+from src.mappers.books import BooksDataMapper
 from src.models.books import BookModelOrm
 from src.repositories.base import BaseRepository
-from src.repositories.mappers.mappers import BooksDataMapper
 from src.schemas.books import BookResponse
 
 
