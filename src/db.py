@@ -1,4 +1,4 @@
-from contextlib import asynccontextmanager
+from collections.abc import AsyncIterator
 
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
@@ -23,12 +23,10 @@ SessionFactory = async_sessionmaker(
 )
 
 
-@asynccontextmanager
-async def get_session() -> AsyncSession:
+async def get_session() -> AsyncIterator[AsyncSession]:
     async with SessionFactory() as session:
         try:
             yield session
-            await session.commit()
         except Exception:
             await session.rollback()
             raise

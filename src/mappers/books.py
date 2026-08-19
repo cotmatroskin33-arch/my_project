@@ -3,6 +3,6 @@ from src.models.books import BookModelOrm
 from src.schemas.books import BookResponse
 
 
-class BooksDataMapper(DataMapper):
-    db_model = BookModelOrm
-    schema = BookResponse
+class BookDataMapper(DataMapper[BookModelOrm, BookResponse]):
+    db_model: type[BookModelOrm] = BookModelOrm
+    schema: type[BookResponse] = BookResponse

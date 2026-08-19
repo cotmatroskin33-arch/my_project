@@ -8,7 +8,7 @@ from src.models.base import Base
 
 
 class BookModelOrm(Base):
-    __tablename__ = "books"
+    __tablename__: str = "books"
 
     id: Mapped[UUID] = mapped_column(
         primary_key=True,
@@ -41,7 +41,7 @@ class BookModelOrm(Base):
         nullable=False,
     )
 
-    updated_at: Mapped[datetime] = mapped_column(
+    updated_at: Mapped[datetime | None] = mapped_column(
         sa.DateTime(timezone=True),
         onupdate=sa.func.now(),
         nullable=True,
