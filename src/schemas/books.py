@@ -3,6 +3,7 @@ from typing import Annotated, Literal, Self
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field, StringConstraints, model_validator
+from pydantic_core import PydanticCustomError
 
 BookTitle = Annotated[
     str,
@@ -39,6 +40,11 @@ class BookResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class BookListResponse(BaseModel):
+    items: list[BookResponse]
+    next_cursor: UUID | None = None
+
+
 class BookUpdate(BaseModel):
     title: BookTitle | None = None
     author: BookAuthor | None = None
@@ -48,11 +54,20 @@ class BookUpdate(BaseModel):
     @model_validator(mode="after")
     def validate_payload(self) -> Self:
         if not self.model_fields_set:
-            raise ValueError("At least one field must be provided")
+            raise PydanticCustomError(
+                "empty_update_payload",
+                "At least one field must be provided",
+            )
 
-        none_fields = [field for field in self.model_fields_set if getattr(self, field) is None]
+        none_fields = [
+            field for field in self.model_fields_set if getattr(self, field) is None
+        ]
         if none_fields:
-            raise ValueError("Fields cannot be null")
+            raise PydanticCustomError(
+                "null_update_field",
+                "Fields cannot be null: {fields}",
+                {"fields": ", ".join(none_fields)},
+            )
 
         return self
 

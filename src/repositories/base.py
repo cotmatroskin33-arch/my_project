@@ -28,15 +28,6 @@ class BaseRepository[ModelT]:
         await self.session.refresh(orm_obj)
         return orm_obj
 
-    async def get_filtered(
-        self,
-        *filters: Any,
-        **filter_by: Any,
-    ) -> list[ModelT]:
-        query = select(self.model).filter(*filters).filter_by(**filter_by)
-        result = await self.session.execute(query)
-        return list(result.scalars().all())
-
     async def get_one_or_none(self, **filter_by: Any) -> ModelT | None:
         query = select(self.model).filter_by(**filter_by)
         result = await self.session.execute(query)

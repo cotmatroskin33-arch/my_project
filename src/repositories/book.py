@@ -1,4 +1,7 @@
 from typing import Any
+from uuid import UUID
+
+from sqlalchemy import select
 
 from src.models.books import BookModelOrm
 from src.repositories.base import BaseRepository
@@ -7,10 +10,19 @@ from src.repositories.base import BaseRepository
 class BookRepository(BaseRepository[BookModelOrm]):
     model: type[BookModelOrm] = BookModelOrm
 
-    async def get_all(self) -> list[BookModelOrm]:
-        return await self.get_filtered(
-            self.model.is_deleted.is_(False)
-        )
+    async def get_page(
+        self,
+        limit: int,
+        cursor: UUID | None = None,
+    ) -> list[BookModelOrm]:
+        query = select(self.model).where(self.model.is_deleted.is_(False))
+
+        if cursor is not None:
+            query = query.where(self.model.id > cursor)
+
+        query = query.order_by(self.model.id.asc()).limit(limit)
+        result = await self.session.execute(query)
+        return list(result.scalars().all())
 
     async def delete(self, orm_obj: BookModelOrm) -> None:
         orm_obj.is_deleted = True
