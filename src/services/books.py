@@ -1,11 +1,16 @@
 from typing import Any
-from uuid import UUID
 
 from src.exceptions import EntityNotFoundError
 from src.mappers.books import BookDataMapper
 from src.models.books import BookModelOrm
 from src.repositories.book import BookRepository
-from src.schemas.books import BookCreate, BookListResponse, BookResponse, BookUpdate
+from src.schemas.books import (
+    BookCreate,
+    BookListResponse,
+    BookPageCursor,
+    BookResponse,
+    BookUpdate,
+)
 
 
 class BookService:
@@ -25,11 +30,22 @@ class BookService:
     async def get_page(
         self,
         limit: int,
-        cursor: UUID | None = None,
+        cursor: BookPageCursor | None = None,
     ) -> BookListResponse:
-        books = await self.repository.get_page(limit + 1, cursor)
+        books = await self.repository.get_page(
+            limit + 1,
+            cursor_created_at=cursor.created_at if cursor is not None else None,
+            cursor_id=cursor.id if cursor is not None else None,
+        )
         page_books = books[:limit]
-        next_cursor = page_books[-1].id if len(books) > limit and page_books else None
+        next_cursor = (
+            BookPageCursor(
+                created_at=page_books[-1].created_at,
+                id=page_books[-1].id,
+            )
+            if len(books) > limit and page_books
+            else None
+        )
 
         return BookListResponse(
             items=self.mapper.to_schema_list(page_books),

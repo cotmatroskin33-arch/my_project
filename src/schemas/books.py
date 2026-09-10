@@ -40,9 +40,14 @@ class BookResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class BookPageCursor(BaseModel):
+    created_at: datetime
+    id: UUID
+
+
 class BookListResponse(BaseModel):
     items: list[BookResponse]
-    next_cursor: UUID | None = None
+    next_cursor: BookPageCursor | None = None
 
 
 class BookUpdate(BaseModel):

@@ -1,12 +1,15 @@
-class ApplicationError(Exception):
-    status_code: int = 500
-    detail: str = "Application error"
+from http import HTTPStatus
 
-    def __init__(self, detail: str | None = None) -> None:
-        if detail is not None:
-            self.detail = detail
-        super().__init__(self.detail)
+
+class ApplicationError(Exception):
+    status_code: HTTPStatus = HTTPStatus.INTERNAL_SERVER_ERROR
+    message: str = "Application error"
+
+    def __init__(self, message: str | None = None) -> None:
+        if message is not None:
+            self.message = message
+        super().__init__(self.message)
 
 
 class EntityNotFoundError(ApplicationError):
-    status_code = 404
+    status_code = HTTPStatus.NOT_FOUND
