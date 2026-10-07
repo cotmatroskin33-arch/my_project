@@ -1,3 +1,3 @@
-from src.models.books import BookModelOrm
+from src.models.books import BookChapterModelOrm, BookModelOrm
 
-__all__ = ["BookModelOrm"]
+__all__ = ["BookChapterModelOrm", "BookModelOrm"]
